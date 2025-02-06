@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const serverless = require('serverless-http');
 const { Server } = require('socket.io');
 const morgan = require('morgan');
-
+const router = express.Router();
 const app = express();
 const server = http.createServer(app);
 
@@ -23,6 +24,8 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
+app.use('./netlify/functions/src', router);
+
 io.on('connection', (socket) => {
     console.log('User connected', socket.id);
 
@@ -39,6 +42,9 @@ io.on('connection', (socket) => {
         console.log('User disconnected', socket.id);
     });
 });
+
+module.exports = app;
+module.exports.handler = serverless(app);
 
 server.listen(3000, () => {
     console.log('Server is running on port 3000');
